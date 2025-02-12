@@ -14,7 +14,7 @@ export const submitForm = async (
 
     console.log(name, email);
 
-    const user = await prisma.user.create({
+    const user = await prisma.userForm.create({
       data: { name, email },
     });
     res.json({
