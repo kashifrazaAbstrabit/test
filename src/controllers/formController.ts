@@ -10,6 +10,7 @@ export const submitForm = async (
   res: Response
 ): Promise<void> => {
   try {
+    console.log("object", req.body);
     const { name, email } = req.body;
 
     console.log(name, email);
