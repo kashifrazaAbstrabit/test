@@ -4,27 +4,43 @@ interface IUser {
   name: string;
   email: string;
 }
-
 export const submitForm = async (
-  req: Request<{}, {}, IUser>,
+  req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    console.log("object", req.body);
-    const { name, email } = req.body;
+    console.log("Received data:", req.body);
 
-    console.log(name, email);
+    if (!Array.isArray(req.body)) {
+      res.status(400).json({ message: "Invalid data format" });
+      return;
+    }
 
+    // Extract name and email from the array
+    const formData = req.body.reduce((acc, item) => {
+      if (item.question === "Name") acc.name = item.answer;
+      if (item.question === "Email") acc.email = item.answer;
+      return acc;
+    }, {} as { name?: string; email?: string });
+
+    if (!formData.name || !formData.email) {
+      res.status(400).json({ message: "Missing name or email" });
+      return;
+    }
+
+    console.log("Extracted Data:", formData);
+
+    // Save to database
     const user = await prisma.userForm.create({
-      data: { name, email },
+      data: { name: formData.name, email: formData.email },
     });
+
     res.json({
       message: "User created successfully",
       user,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error:", error);
     res.status(500).json({ message: "Internal server error" });
-    return;
   }
 };
